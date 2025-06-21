@@ -36,4 +36,13 @@ class AuthController extends Controller
 
         return response()->json(['token'=>$user->createToken('token')->plainTextToken],200);
     }
+
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'message' => 'Logout berhasil. Token dihapus.'
+        ]);
+    }
 }
