@@ -8,72 +8,51 @@ use Illuminate\Support\Facades\Auth;
 
 class AppointmentController extends Controller
 {
-    // Ambil semua appointment milik user
+    /**
+     * Menampilkan semua janji temu.
+     * - Admin bisa melihat semua.
+     * - Pasien hanya melihat miliknya sendiri.
+     */
     public function index()
     {
         $user = Auth::user();
 
-        // Admin bisa melihat semua appointment
         if ($user->is_admin ?? false) {
             return Appointment::with('doctor', 'user')->get();
         }
 
-        // Pasien hanya melihat miliknya
         return Appointment::with('doctor')
             ->where('user_id', $user->id)
             ->orderBy('scheduled_at', 'asc')
             ->get();
     }
 
-    // Buat appointment baru
+    /**
+     * Membuat janji temu baru.
+     */
     public function store(Request $request)
     {
-        $request->validate([
-            'doctor_id' => 'required|exists:doctors,id',
-            'scheduled_at' => 'required|date',
-            'status' => 'nullable|in:pending,approved,canceled,completed',
+        $validated = $request->validate([
+            'doctor_id'    => 'required|exists:doctors,id',
+            'scheduled_at' => 'required|date|after_or_equal:today',
+            'purpose'      => 'required|string|max:255',
+            'status'       => 'nullable|in:pending,approved,canceled,completed',
         ]);
 
         $appointment = Appointment::create([
-            'user_id' => Auth::id(),
-            'doctor_id' => $request->doctor_id,
-            'scheduled_at' => $request->scheduled_at,
-            'status' => $request->input('status', 'pending'), // ← default jika kosong
+            'user_id'      => Auth::id(),
+            'doctor_id'    => $validated['doctor_id'],
+            'scheduled_at' => $validated['scheduled_at'],
+            'purpose'      => $validated['purpose'],
+            'status'       => $validated['status'] ?? 'pending',
         ]);
 
         return response()->json($appointment, 201);
     }
-
-    // Ubah appointment (status atau jadwal)
-    public function update(Request $request, $id)
-    {
-    // Coba ambil appointment, kalau tidak ada langsung 404
-    $appointment = Appointment::findOrFail($id);
-    $user = Auth::user();
-
-    // Cek apakah user adalah pemilik appointment atau admin
-    if ($user->id !== $appointment->user_id && !($user->is_admin)) {
-        return response()->json(['message' => 'Anda tidak memiliki akses'], 403);
-    }
-
-    // Validasi input
-    $validated = $request->validate([
-        'scheduled_at' => 'sometimes|date',
-        'status' => 'sometimes|in:pending,approved,canceled,completed',
-    ]);
-
-    // Update hanya field yang dikirim
-    $appointment->fill($validated);
-    $appointment->save();
-
-    return response()->json([
-        'message' => 'Appointment berhasil diperbarui',
-        'data' => $appointment
-    ]);
-    }   
-
-
-    // Hapus appointment
+    
+    /**
+     * Menghapus janji temu.
+     */
     public function destroy($id)
     {
         $appointment = Appointment::findOrFail($id);

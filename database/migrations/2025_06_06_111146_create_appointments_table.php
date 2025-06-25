@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('doctor_id')->constrained()->onDelete('cascade');
             $table->dateTime('scheduled_at');
+            $table->string('purpose');
             $table->string('status')->default('pending');
             $table->timestamps();
         });

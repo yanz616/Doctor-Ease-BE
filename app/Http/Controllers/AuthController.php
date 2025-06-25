@@ -21,9 +21,13 @@ class AuthController extends Controller
             'name'=> $request->name,
             'email'=> $request->email,
             'password'=> bcrypt($request->password),
+            'is_admin'=> false,
         ]);
 
-        return response()->json(['token'=>$user->createToken('token')->plainTextToken],200);
+        return response()->json([
+            'token'=> $user->createToken('token')->plainTextToken,
+            'is_admin' => $user->is_admin,
+        ],200);
     }
 
     public function login(Request $request){
@@ -34,7 +38,10 @@ class AuthController extends Controller
             throw ValidationException::withMessages(['email'=> 'invalid credentials']);
         }
 
-        return response()->json(['token'=>$user->createToken('token')->plainTextToken],200);
+        return response()->json([
+            'token'=>$user->createToken('token')->plainTextToken,
+            'is_admin'=> $user->is_admin,
+        ],200);
     }
 
     public function logout(Request $request)

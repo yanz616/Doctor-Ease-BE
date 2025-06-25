@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\AdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,7 +30,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/appointments', [AppointmentController::class, 'store']);
     Route::get('/appointments', [AppointmentController::class, 'index']);
     Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy']);
-    // Route::put('/appointments/{id}', [AppointmentController::class, 'update']);
-    Route::patch('/appointments/{id}', [AppointmentController::class, 'update']);
     Route::post('/logout', [AuthController::class, 'logout']);
 });
+
+Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/doctors', [AdminController::class, 'doctors']);
+    Route::post('/doctors', [AdminController::class, 'storeDoctor']);
+    Route::put('/doctors/{id}', [AdminController::class, 'updateDoctor']);
+    Route::delete('/doctors/{id}', [AdminController::class, 'destroyDoctor']);
+    Route::get('/appointments', [AdminController::class, 'appointments']);
+    Route::put('/appointments/{id}', [AdminController::class, 'updateAppointment']);
+    Route::delete('/appointments/{id}', [AdminController::class, 'destroyAppointment']);Route::get('/users', [AdminController::class, 'users']);
+    Route::put('/users/{id}', [AdminController::class, 'updateUser']);
+    Route::delete('/users/{id}', [AdminController::class, 'destroyUser']);
+});
+
