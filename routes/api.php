@@ -28,20 +28,21 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/doctors', [DoctorController::class, 'index']);
     Route::post('/appointments', [AppointmentController::class, 'store']);
-    Route::get('/appointments', [AppointmentController::class, 'index']);
+    Route::get('/appointments', [AppointmentController::class, 'index']);//id user
     Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy']);
     Route::post('/logout', [AuthController::class, 'logout']);
 });
 
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
     Route::get('/doctors', [AdminController::class, 'doctors']);
+    Route::get('/doctors/{id}', [AdminController::class, 'getDoctor']);
     Route::post('/doctors', [AdminController::class, 'storeDoctor']);
     Route::put('/doctors/{id}', [AdminController::class, 'updateDoctor']);
     Route::delete('/doctors/{id}', [AdminController::class, 'destroyDoctor']);
     Route::get('/appointments', [AdminController::class, 'appointments']);
+    Route::get('/appointments/{id}', [AdminController::class, 'getAppointment']);
     Route::put('/appointments/{id}', [AdminController::class, 'updateAppointment']);
-    Route::delete('/appointments/{id}', [AdminController::class, 'destroyAppointment']);Route::get('/users', [AdminController::class, 'users']);
-    Route::put('/users/{id}', [AdminController::class, 'updateUser']);
-    Route::delete('/users/{id}', [AdminController::class, 'destroyUser']);
+    Route::delete('/appointments/{id}', [AdminController::class, 'destroyAppointment']);
+    Route::get('/users', [AdminController::class, 'users']);
 });
 

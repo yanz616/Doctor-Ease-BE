@@ -15,6 +15,17 @@ class AdminController extends Controller
         return response()->json(Doctor::all());
     }
 
+    public function getDoctor($id)
+    {
+        $doctor = Doctor::find($id);
+    
+        if (!$doctor) {
+            return response()->json(['message' => 'Doctor not found'], 404);
+        }
+
+        return response()->json($doctor);
+    }
+
     // Tambah doctor
     public function storeDoctor(Request $request)
     {
@@ -57,6 +68,17 @@ class AdminController extends Controller
         return response()->json(Appointment::with('user', 'doctor')->get());
     }
 
+    public function getAppoinment($id)
+    {
+        $appointment = Appointment::find($id);
+    
+        if (!$appointment) {
+            return response()->json(['message' => 'Appointment not found'], 404);
+        }
+
+        return response()->json($appointment);
+    }
+
     // Update appointment (status, jadwal, dll)
     public function updateAppointment(Request $request, $id)
     {
@@ -65,7 +87,7 @@ class AdminController extends Controller
         $data = $request->validate([
             'scheduled_at' => 'sometimes|date',
             'purpose' => 'sometimes|string',
-            'status' => 'sometimes|in:pending,approved,canceled,completed'
+            'status' => 'sometimes|in:approved,canceled,completed'
         ]);
 
         $appointment->update($data);
@@ -86,31 +108,31 @@ class AdminController extends Controller
         return response()->json(User::all());
     }
 
-    // Update user
-    public function updateUser(Request $request, $id)
-    {
-        $user = User::findOrFail($id);
+    // // Update user
+    // public function updateUser(Request $request, $id)
+    // {
+    //     $user = User::findOrFail($id);
 
-        $data = $request->validate([
-            'name' => 'sometimes|string',
-            'email' => 'sometimes|email|unique:users,email,' . $id,
-            'is_admin' => 'sometimes|boolean'
-        ]);
+    //     $data = $request->validate([
+    //         'name' => 'sometimes|string',
+    //         'email' => 'sometimes|email|unique:users,email,' . $id,
+    //         'is_admin' => 'sometimes|boolean'
+    //     ]);
 
-        $user->update($data);
-        return response()->json($user);
-    }
+    //     $user->update($data);
+    //     return response()->json($user);
+    // }
 
-    // Hapus user
-    public function destroyUser($id)
-    {
-        try {
-            $user = User::findOrFail($id);
-            $user->delete();
-            return response()->json(['message' => 'User deleted']);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'User not found or failed to delete'], 500);
-        }
-    }
+    // // Hapus user
+    // public function destroyUser($id)
+    // {
+    //     try {
+    //         $user = User::findOrFail($id);
+    //         $user->delete();
+    //         return response()->json(['message' => 'User deleted']);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['error' => 'User not found or failed to delete'], 500);
+    //     }
+    // }
 
 }
