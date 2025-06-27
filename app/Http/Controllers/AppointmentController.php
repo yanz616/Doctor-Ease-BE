@@ -8,62 +8,51 @@ use Illuminate\Support\Facades\Auth;
 
 class AppointmentController extends Controller
 {
-    /**
-     * Menampilkan semua janji temu.
-     * - Admin bisa melihat semua.
-     * - Pasien hanya melihat miliknya sendiri.
-     */
-    public function index()
-    {
-        $user = Auth::user();
-
-        if ($user->is_admin ?? false) {
-            return Appointment::with('doctor', 'user')->get();
-        }
-
-        return Appointment::with('doctor')
-            ->where('user_id', $user->id)
-            ->orderBy('scheduled_at', 'asc')
-            ->get();
-    }
-
-    /**
-     * Membuat janji temu baru.
-     */
+    // 1. Buat appointment baru
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'doctor_id'    => 'required|exists:doctors,id',
-            'scheduled_at' => 'required|date|after_or_equal:today',
-            'purpose'      => 'required|string|max:255',
-            'status'       => 'nullable|in:pending,approved,canceled,completed',
+        $request->validate([
+            'doctor_id' => 'required|exists:doctors,id',
+            'scheduled_at' => 'required|date',
+            'purpose' => 'required|string',
         ]);
 
         $appointment = Appointment::create([
-            'user_id'      => Auth::id(),
-            'doctor_id'    => $validated['doctor_id'],
-            'scheduled_at' => $validated['scheduled_at'],
-            'purpose'      => $validated['purpose'],
-            'status'       => $validated['status'] ?? 'pending',
+            'user_id' => Auth::id(),
+            'doctor_id' => $request->doctor_id,
+            'scheduled_at' => $request->scheduled_at,
+            'purpose' => $request->purpose,
+            'status' => 'pending',
         ]);
 
-        return response()->json($appointment, 201);
+        return response()->json([
+            'message' => 'Appointment berhasil dibuat',
+            'data' => $appointment,
+        ], 201);
     }
-    
-    /**
-     * Menghapus janji temu.
-     */
+
+    // 2. Lihat semua appointment milik user yang sedang login
+    public function index()
+    {
+        $appointments = Appointment::with(['doctor'])
+            ->where('user_id', Auth::id())
+            ->orderBy('scheduled_at', 'asc')
+            ->get();
+
+        return response()->json($appointments);
+    }
+
+    // 3. Hapus appointment milik sendiri (cancel/batalkan)
     public function destroy($id)
     {
         $appointment = Appointment::findOrFail($id);
-        $user = Auth::user();
 
-        if ($user->id !== $appointment->user_id && !($user->is_admin ?? false)) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        if ($appointment->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Tidak diizinkan menghapus appointment ini'], 403);
         }
 
         $appointment->delete();
 
-        return response()->json(['message' => 'Appointment deleted']);
+        return response()->json(['message' => 'Appointment berhasil dibatalkan/hapus']);
     }
 }

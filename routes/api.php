@@ -44,5 +44,6 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
     Route::put('/appointments/{id}', [AdminController::class, 'updateAppointment']);
     Route::delete('/appointments/{id}', [AdminController::class, 'destroyAppointment']);
     Route::get('/users', [AdminController::class, 'users']);
+    Route::get('/users/{id}', [AdminController::class, 'getUser']);
 });
 

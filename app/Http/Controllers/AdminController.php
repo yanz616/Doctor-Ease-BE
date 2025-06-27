@@ -68,7 +68,7 @@ class AdminController extends Controller
         return response()->json(Appointment::with('user', 'doctor')->get());
     }
 
-    public function getAppoinment($id)
+    public function getAppointment($id)
     {
         $appointment = Appointment::find($id);
     
@@ -106,6 +106,18 @@ class AdminController extends Controller
     public function users()
     {
         return response()->json(User::all());
+    }
+
+    //get user by id
+    public function getUser($id)
+    {
+        $user = User::find($id);
+    
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        return response()->json($user);
     }
 
     // // Update user
