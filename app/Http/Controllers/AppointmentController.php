@@ -42,6 +42,35 @@ class AppointmentController extends Controller
         return response()->json($appointments);
     }
 
+    public function update(Request $request, $id)
+    {
+        // Cari appointment
+        $appointment = Appointment::findOrFail($id);
+
+        // Pastikan appointment milik user yang sedang login
+        if ($appointment->user_id !== auth()->id()) {
+            return response()->json(['error' => 'Unauthorized.'], 403);
+        }
+
+        // Validasi input
+        $validated = $request->validate([
+            'scheduled_at' => 'sometimes|date',
+            'purpose' => 'sometimes|string',
+            // status di sini opsional, misalnya jika user boleh set ulang ke pending
+            // tapi biasanya user tidak bisa ubah status, hanya admin
+        ]);
+
+        // Update hanya field yang valid
+        $appointment->update($validated);
+
+        return response()->json([
+            'message' => 'Appointment updated successfully.',
+            'data' => $appointment
+        ]);
+    }
+
+
+
     // 3. Hapus appointment milik sendiri (cancel/batalkan)
     public function destroy($id)
     {

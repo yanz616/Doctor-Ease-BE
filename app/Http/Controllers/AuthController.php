@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -15,11 +16,13 @@ class AuthController extends Controller
             'name'=>'required',
             'email'=> 'required|email|unique:users',
             'password'=> 'required|confirmed|min:6',
+            'avatar'=> 'nullable|url',
         ]);
 
         $user = User::create([
             'name'=> $request->name,
             'email'=> $request->email,
+            'avatar'=> $request->avatar,
             'password'=> bcrypt($request->password),
             'is_admin'=> false,
         ]);
@@ -52,4 +55,29 @@ class AuthController extends Controller
             'message' => 'Logout berhasil. Token dihapus.'
         ]);
     }
+
+    // Update profile user yang sedang login
+    public function update(Request $request)
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'name' => 'sometimes|string',
+            'email' => 'sometimes|email|unique:users,email,' . $user->id,
+            'avatar' => 'nullable|url',
+        ]);
+
+        $user->update($validated);
+
+        return response()->json([
+            'message' => 'updated successfully',
+            'data' => $user
+        ]);
+    }
+
+    public function me(Request $request)
+    {
+        return response()->json($request->user());
+    }
+
 }

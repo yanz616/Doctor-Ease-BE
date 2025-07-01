@@ -12,7 +12,7 @@ class Doctor extends Model
     protected $fillable =[
         'name',
         'specialization',
-        'photo_url'
+        'photo'
     ];
 
     public function appointments() {

@@ -14,7 +14,7 @@ class Appointment extends Model
         'doctor_id',
         'scheduled_at',
         'purpose',
-        'status',
+        'status'
     ];
 
     public function user() {

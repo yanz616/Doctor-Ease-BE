@@ -32,7 +32,7 @@ class AdminController extends Controller
         $data = $request->validate([
             'name' => 'required|string',
             'specialization' => 'required|string',
-            'photo_url' => 'nullable|url',
+            'photo' => 'nullable|url',
         ]);
 
         $doctor = Doctor::create($data);
@@ -47,7 +47,7 @@ class AdminController extends Controller
         $data = $request->validate([
             'name' => 'sometimes|string',
             'specialization' => 'sometimes|string',
-            'photo_url' => 'nullable|url',
+            'photo' => 'nullable|url',
         ]);
 
         $doctor->update($data);
