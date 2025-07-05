@@ -29,7 +29,8 @@ class AuthController extends Controller
 
         return response()->json([
             'token'=> $user->createToken('token')->plainTextToken,
-            'is_admin' => $user->is_admin,
+            'user' => $user,
+            // 'is_admin' => $user->is_admin,
         ],200);
     }
 
@@ -43,7 +44,8 @@ class AuthController extends Controller
 
         return response()->json([
             'token'=>$user->createToken('token')->plainTextToken,
-            'is_admin'=> $user->is_admin,
+            // 'is_admin'=> $user->is_admin,
+            'user' => $user,
         ],200);
     }
 
@@ -65,15 +67,24 @@ class AuthController extends Controller
             'name' => 'sometimes|string',
             'email' => 'sometimes|email|unique:users,email,' . $user->id,
             'avatar' => 'nullable|url',
+            'password' => 'nullable|confirmed|min:6', // ⬅ password & confirmation
         ]);
+
+        // Jika password dikirim, enkripsi dulu
+        if (!empty($validated['password'])) {
+            $validated['password'] = bcrypt($validated['password']);
+        } else {
+            unset($validated['password']); // Jangan ubah password jika kosong
+        }
 
         $user->update($validated);
 
         return response()->json([
-            'message' => 'updated successfully',
+            'message' => 'Profile berhasil diperbarui.',
             'data' => $user
         ]);
     }
+
 
     public function me(Request $request)
     {
